@@ -1,0 +1,36 @@
+# F1TENTH gym + ROS 2 Jazzy simulator (prebuilt linux/amd64 image).
+# Load the image first:  docker load -i f1tenth_gym_ros_jazzy_amd64.tar.gz
+# Then:                  docker compose up -d
+
+services:
+  sim:
+    image: ghcr.io/crta-lab/roboracer-simulator:latest
+    platform: linux/amd64
+    ports:
+      # foxglove_bridge websocket (optional): ws://localhost:8765
+      - "8765:8765"
+    volumes:
+      # Your own ROS 2 packages (wall_follow, ...). Edit on the host, then
+      # `colcon build` inside the container.
+      - ./student:/sim_ws/src/student
+    environment:
+      - DISPLAY=novnc:0.0
+    depends_on:
+      - novnc
+    networks:
+      - x11
+    stdin_open: true
+    tty: true
+  # RViz in the browser: http://localhost:8080/vnc.html
+  novnc:
+    image: theasp/novnc:latest
+    platform: linux/amd64
+    environment:
+      - DISPLAY_WIDTH=1728
+      - DISPLAY_HEIGHT=972
+    ports:
+      - "8080:8080"
+    networks:
+      - x11
+networks:
+  x11:
