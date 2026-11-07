@@ -41,7 +41,9 @@ jobs:
           fi
 
       - name: Build base + sim
-        run: docker compose build sim
+        # Plain docker build (same script as on a Mac): older Compose on the
+        # runner can't resolve the profile-gated `service:base` context.
+        run: docker/build-platform.sh linux/amd64
 
       - name: Launch sim in container
         run: |
@@ -74,4 +76,6 @@ jobs:
 
       - name: Push base + sim
         if: github.event_name != 'pull_request'
-        run: docker compose --profile build push base sim
+        run: |
+          docker push "$REGISTRY/f1tenth-base:$TAG"
+          docker push "$REGISTRY/f1tenth-sim:$TAG"
