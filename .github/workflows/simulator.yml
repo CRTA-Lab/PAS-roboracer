@@ -1,0 +1,77 @@
+name: Simulator images
+
+# Builds ghcr.io/<owner>/f1tenth-base and f1tenth-sim from simulator/ for
+# linux/amd64, smoke-tests the sim, and pushes both to GHCR:
+#   push to main / dev*  -> :jazzy
+#   tag vX.Y             -> :vX.Y
+# Pull requests build and test only. A successful run on main triggers
+# labs.yml, so every lab is rebuilt on the new base.
+
+on:
+  push:
+    branches: [ main, 'dev*' ]
+    tags: [ 'v*' ]
+    paths: [ 'simulator/**', '.github/workflows/simulator.yml' ]
+  pull_request:
+    paths: [ 'simulator/**', '.github/workflows/simulator.yml' ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: simulator
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set registry and tag
+        run: |
+          owner='${{ github.repository_owner }}'
+          echo "REGISTRY=ghcr.io/${owner,,}" >> "$GITHUB_ENV"
+          if [ '${{ github.ref_type }}' = tag ]; then
+            echo "TAG=${{ github.ref_name }}" >> "$GITHUB_ENV"
+          else
+            echo "TAG=jazzy" >> "$GITHUB_ENV"
+          fi
+
+      - name: Build base + sim
+        run: docker compose build sim
+
+      - name: Launch sim in container
+        run: |
+          docker run -d --name sim "$REGISTRY/f1tenth-sim:$TAG" \
+            ros2 launch f1tenth_gym_ros gym_bridge_launch.py open_foxglove:=false
+
+      - name: Check expected topics
+        run: |
+          # generous wait: JIT compilation in gym_bridge delays topic creation
+          sleep 60
+          docker exec sim /entrypoint.sh ros2 topic list | tee topics.txt
+          grep -qx /scan topics.txt
+          grep -qx /ego_racecar/odom topics.txt
+
+      - name: Show sim logs on failure
+        if: failure()
+        run: docker logs sim || true
+
+      - name: Cleanup
+        if: always()
+        run: docker rm -f sim || true
+
+      - name: Log in to GHCR
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push base + sim
+        if: github.event_name != 'pull_request'
+        run: docker compose --profile build push base sim

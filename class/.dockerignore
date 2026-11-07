@@ -1,0 +1,7 @@
+.git
+.github
+work
+**/__pycache__
+**/build
+**/install
+**/log
