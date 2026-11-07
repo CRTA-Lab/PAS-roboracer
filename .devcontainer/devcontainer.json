@@ -1,0 +1,17 @@
+{
+    "name": "ROBORACER ROS2 Jazzy",
+    "dockerComposeFile": "../vjezbe-primjeri/docker-compose.yml",
+    "service": "sim",
+    "workspaceFolder": "/sim_ws/src/student",
+    "shutdownAction": "none",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-vscode.cpptools",
+                "ms-vscode.cmake-tools",
+                "ms-python.python",
+                "ms-iot.vscode-ros"
+            ]
+        }
+    }
+}

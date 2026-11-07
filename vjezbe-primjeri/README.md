@@ -8,13 +8,7 @@ with RViz in the browser (noVNC) and the `wall_follow` package included.
 - Linux on an x86_64 (amd64) machine
 - Docker Engine with the `docker compose` plugin: https://docs.docker.com/engine/install/
 
-## 1. Load the image (once)
-
-```bash
-docker load -i f1tenth_gym_ros_jazzy_amd64.tar.gz
-```
-
-## 2. Start the containers
+## 1. Start the containers
 
 From this folder:
 
@@ -24,14 +18,14 @@ docker compose up -d
 
 This starts the simulator container and a noVNC container for the display.
 
-## 3. Open the display
+## 2. Open the display
 
 Open http://localhost:8080/vnc.html in your browser and click **Connect**.
 
-## 4. Launch the simulator
+## 3. Launch the simulator
 
 ```bash
-docker exec -it f1tenth_jazzy_amd64-sim-1 bash
+docker exec -it roboracer-sim bash
 ```
 
 ```bash
@@ -40,12 +34,12 @@ ros2 launch f1tenth_gym_ros gym_bridge_launch.py
 
 RViz opens in the noVNC tab with the map and the car.
 
-## 5. Run wall_follow
+## 4. Run wall_follow
 
 In a second terminal (or a new `tmux` window: `Ctrl+b` then `c`):
 
 ```bash
-docker exec -it f1tenth_jazzy_amd64-sim-1 bash
+docker exec -it roboracer-sim bash
 ```
 
 ```bash
@@ -54,7 +48,11 @@ ros2 run wall_follow wall_follow
 
 ## Editing your own code
 
-`./student` is mounted at `/sim_ws/src/student` in the container. Edit files on your machine,
+There are a couple of ways to tryout your own code:
+
+### Outside docker
+
+`./student` is mounted at `/sim_ws/src/student` in the roboracer-sim container. Edit files on your machine,
 then rebuild inside the container:
 
 ```bash
@@ -62,6 +60,11 @@ cd /sim_ws && colcon build --symlink-install && source install/setup.bash
 ```
 
 New packages you add to `./student` are picked up the same way.
+
+### Inside docker with a .devcontainer
+
+With a VSCode devcontainer extension, development can be done directly inside a docker container. 
+After downloading the extension[https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers], Ctrl+Shift+P and select reopen in container. Configuration is already ready to go and located in .devcontainer folder.
 
 ## Stop
 

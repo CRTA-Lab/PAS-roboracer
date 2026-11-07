@@ -1,9 +1,8 @@
 # F1TENTH gym + ROS 2 Jazzy simulator (prebuilt linux/amd64 image).
-# Load the image first:  docker load -i f1tenth_gym_ros_jazzy_amd64.tar.gz
-# Then:                  docker compose up -d
 
 services:
   sim:
+    container_name: roboracer-sim
     image: ghcr.io/crta-lab/roboracer-simulator:latest
     platform: linux/amd64
     ports:
@@ -23,6 +22,7 @@ services:
     tty: true
   # RViz in the browser: http://localhost:8080/vnc.html
   novnc:
+    container_name: roboracer-novnc
     image: theasp/novnc:latest
     platform: linux/amd64
     environment:
