@@ -52,11 +52,20 @@ jobs:
 
       - name: Check expected topics
         run: |
-          # generous wait: JIT compilation in gym_bridge delays topic creation
-          sleep 60
-          docker exec sim /entrypoint.sh ros2 topic list | tee topics.txt
-          grep -qx /scan topics.txt
-          grep -qx /ego_racecar/odom topics.txt
+          # Poll for up to 3 min (JIT compilation in gym_bridge delays topic
+          # creation). --no-daemon: a freshly started ros2 daemon answers
+          # before discovery completes and lists only /rosout.
+          for i in $(seq 18); do
+            docker exec sim /entrypoint.sh \
+              ros2 topic list --no-daemon --spin-time 5 > topics.txt || true
+            if grep -qx /scan topics.txt && grep -qx /ego_racecar/odom topics.txt; then
+              cat topics.txt
+              exit 0
+            fi
+            sleep 5
+          done
+          cat topics.txt
+          exit 1
 
       - name: Show sim logs on failure
         if: failure()
