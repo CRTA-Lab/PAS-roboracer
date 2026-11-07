@@ -10,7 +10,7 @@ with RViz in the browser (noVNC) and the `wall_follow` package included.
 
 ## 1. Start the containers
 
-From this folder:
+From this folder, in a terminal run:
 
 ```bash
 docker compose up -d
@@ -18,25 +18,35 @@ docker compose up -d
 
 This starts the simulator container and a noVNC container for the display.
 
-## 2. Open the display
+## 2. Launch the sim
 
-Open http://localhost:8080/vnc.html in your browser and click **Connect**.
-
-## 3. Launch the simulator
+In a terminal run:
 
 ```bash
 docker exec -it roboracer-sim bash
 ```
 
+You are now inside roboracer-sim docker container. Run the simulator with:
+
 ```bash
-ros2 launch f1tenth_gym_ros gym_bridge_launch.py
+ros2 launch f1tenth_gym_ros gym_bridge_launch.py config:=/sim_ws/config/sim_config.yaml
 ```
 
-RViz opens in the noVNC tab with the map and the car.
+This passes the parameters located in /vjezbe-primjeri/config/sim_config.yaml on the host PC.
+
+## 3. Open the display
+
+### Foxglove
+
+Download [foxglove studio](https://foxglove.dev/download) and connect to ws://localhost:8765.
+
+### NoVNC
+
+Open http://localhost:8080/vnc.html in your browser and click **Connect**.
 
 ## 4. Run wall_follow
 
-In a second terminal (or a new `tmux` window: `Ctrl+b` then `c`):
+In another terminal run:
 
 ```bash
 docker exec -it roboracer-sim bash
@@ -45,6 +55,8 @@ docker exec -it roboracer-sim bash
 ```bash
 ros2 run wall_follow wall_follow
 ```
+
+This will run wall_follow example. In a similar manner, you can run your own code that should be located at `/sim_ws/src/student` inside the container.
 
 ## Editing your own code
 
@@ -64,7 +76,7 @@ New packages you add to `./student` are picked up the same way.
 ### Inside docker with a .devcontainer
 
 With a VSCode devcontainer extension, development can be done directly inside a docker container. 
-After downloading the extension[https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers], Ctrl+Shift+P and select reopen in container. Configuration is already ready to go and located in .devcontainer folder.
+After downloading the [extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers), Ctrl+Shift+P and select reopen in container. Configuration is already ready to go and located in .devcontainer folder.
 
 ## Stop
 

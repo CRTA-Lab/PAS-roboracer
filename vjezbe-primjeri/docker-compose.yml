@@ -12,6 +12,7 @@ services:
       # Your own ROS 2 packages (wall_follow, ...). Edit on the host, then
       # `colcon build` inside the container.
       - ./student:/sim_ws/src/student
+      - ./config:/sim_ws/config:ro
     environment:
       - DISPLAY=novnc:0.0
     depends_on:
